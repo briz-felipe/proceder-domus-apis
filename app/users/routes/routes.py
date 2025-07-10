@@ -7,6 +7,7 @@ from app.auth.auth_handler import sign_jwt
 from app.auth.auth_bearer import JWTBearer
 from app.users.crud.users import create_new_user,get_email,get_username,user_login
 from app.middleware.rate_limit import limiter   
+from app.config.settings import secrets
 
 router = APIRouter()
 
@@ -33,13 +34,13 @@ async def login(user: UserLogin, request: Request, response: Response, session: 
             key='a_mgm',
             value=access_token,
             httponly=True,
-            secure=True if ENVIRONMENT_LOCAL == 'prod' else False
+            secure=False
         )
         response.set_cookie(
             key='r_mgm',
             value=refresh_token,
             httponly=True,
-            secure=True if ENVIRONMENT_LOCAL == 'prod' else False
+            secure=False
         )
 
         return TokenResponse(access_token=access_token,refresh_token=refresh_token)
