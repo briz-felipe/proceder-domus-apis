@@ -7,8 +7,8 @@ class JWTBearer(HTTPBearer):
     def __init__(self, token_types: list[str] = ["access"], auto_error: bool = True):
         super().__init__(auto_error=auto_error)
         self.token_types = token_types
-        self.access_cookie_name = "a_mgm"
-        self.refresh_cookie_name = "r_mgm"
+        self.access_cookie_name = "access_token"
+        self.refresh_cookie_name = "refresh_token"
 
     async def __call__(self, request: Request):
         # 1. Tenta autenticar via Header

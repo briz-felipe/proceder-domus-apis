@@ -7,7 +7,7 @@ from app.auth.auth_handler import sign_jwt
 from app.auth.auth_bearer import JWTBearer
 from app.users.crud.users import create_new_user,get_email,get_username,user_login
 from app.middleware.rate_limit import limiter   
-from app.config.settings import secrets
+from app.config.settings import secrets, envirinment    
 
 router = APIRouter()
 
@@ -31,16 +31,18 @@ async def login(user: UserLogin, request: Request, response: Response, session: 
 
         # Armazenar o access token como cookie seguro
         response.set_cookie(
-            key='a_mgm',
+            key='access_token',
             value=access_token,
             httponly=True,
-            secure=False
+            secure=True if envirinment == 'prod' else False,
+            samesite="Lax"
         )
         response.set_cookie(
-            key='r_mgm',
+            key='refresh_token',
             value=refresh_token,
             httponly=True,
-            secure=False
+            secure=True if envirinment == 'prod' else False,
+            samesite="Lax"
         )
 
         return TokenResponse(access_token=access_token,refresh_token=refresh_token)

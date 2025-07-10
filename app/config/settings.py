@@ -1,5 +1,6 @@
 import os
 
+
 SECRET_KEYS = [
     "JWT_SECRET",
     "JWT_ALGORITHM",
@@ -15,7 +16,7 @@ SECRET_KEYS = [
     "AES256_IV",
 ]
 
-k8s_env = os.environ.get("ENVIRONMENT")
+envirinment = os.environ.get("ENVIRONMENT")
 
 def fetch_secrets():
     
