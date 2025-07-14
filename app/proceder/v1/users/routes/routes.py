@@ -2,12 +2,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.db import get_session
-from app.users.models.users import UserResponse, UserCreate, TokenResponse, UserLogin, TokenVerifyResponse
+from app.proceder.v1.users.schemas.schemas import UserLogin, CreateUser, UserResponse, TokenResponse, TokenVerifyResponse
 from app.auth.auth_handler import sign_jwt
 from app.auth.auth_bearer import JWTBearer
-from app.users.crud.users import create_new_user,get_email,get_username,user_login
+from app.proceder.v1.users.crud.crud import create_new_user,get_email,get_username,user_login
 from app.middleware.rate_limit import limiter   
 from app.config.settings import secrets, envirinment    
+
 
 router = APIRouter()
 
@@ -60,15 +61,10 @@ async def verify_token(request: Request,response: Response):
     return TokenVerifyResponse(token=True)
 
 
-@router.post("/create/{access_token}", response_model=UserResponse,tags=['users'],dependencies=[Depends(JWTBearer())],)
+@router.post("/create", response_model=UserResponse,tags=['users'],dependencies=[Depends(JWTBearer())],)
 @limiter.limit("1/minute")
-async def create_user(user_create: UserCreate,request: Request,response:Response,access_token:str, session: AsyncSession = Depends(get_session)):
+async def create_user(user_create: CreateUser,request: Request,response:Response, session: AsyncSession = Depends(get_session)):
     try:
-        if access_token != secrets['ACCESS_TOKEN']:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Access_token inválido."
-            )
         user = await create_new_user(
             session=session,
             **user_create.dict()
@@ -76,7 +72,6 @@ async def create_user(user_create: UserCreate,request: Request,response:Response
         return UserResponse(
             id=user.id,
             username=user.username,
-            admin=user.admin,
             email=user.email
         )
     except HTTPException as e:

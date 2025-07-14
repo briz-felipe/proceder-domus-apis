@@ -8,10 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from app.config.settings import secrets
-from app.database.db import get_session,init_db,engine
-from app.users.crud.users import create_admin
+from app.database.db import init_db,engine
+from app.proceder.v1.users.crud.crud import create_admin
 
-from app.users.routes import routes as user_route
+from app.proceder.v1.users.routes import routes as user_route
+
+from app.proceder.v1.users.models.models import ProcederUsers
 
 # Configuração do FastAPI
 app = FastAPI()
@@ -33,13 +35,9 @@ async def on_startup():
         engine, class_=AsyncSession, expire_on_commit=False
     )
     async with async_session() as session:
-        username_enviroment = f'ADMIN_USER'
-        email_enviroment = f'ADMIN_EMAIL'
-        password_enviroment = f'ADMIN_PASSWORD'
-        
-        username = secrets[username_enviroment]
-        email = secrets[email_enviroment]
-        password = secrets[password_enviroment]
+        username = secrets['ADMIN_USER']
+        email = secrets['ADMIN_EMAIL']
+        password = secrets['ADMIN_PASSWORD']
         
         await create_admin(session=session, username=username, email=email, password=password)
         

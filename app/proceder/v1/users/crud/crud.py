@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.users.models.users import User
+from app.proceder.v1.users.models.models import ProcederUsers as User
 from sqlalchemy.future import select
 from fastapi import HTTPException, status
 from passlib.hash import bcrypt
@@ -56,18 +56,18 @@ async def user_login(password: str,username : str,session: AsyncSession) -> bool
         raise HTTPException(status_code=400,detail="wrong username or password")
     return user
 
-async def create(session: AsyncSession, username: str, email : str, password: str, admin : bool = False):
+async def create(session: AsyncSession, username: str, email : str, password: str, first_name : str=None, last_name : str = None, admin : bool = False,):
     password = await password_hash(password)
-    user = User(username=username,password=password,email=email,admin=admin)
+    user = User(username=username,password=password,email=email,is_admin=admin,first_name=first_name,last_name=last_name)
     session.add(user) 
     await session.commit()
     await session.refresh(user)
     return user
     
-async def create_new_user(session: AsyncSession, username: str, email: str, password: str,admin : bool) -> User:
+async def create_new_user(session: AsyncSession, username: str, email: str, password: str,admin : bool,first_name : str, last_name : str) -> User:
     if await user_exists(username,email,session):
         raise HTTPException(status_code=400, detail="Username or email already registered")
-    return await create(session, username, email, password,admin)
+    return await create(session, username, email, password,first_name,last_name,admin)
 
 async def create_admin(session: AsyncSession, username: str, email: str, password: str):
     if not await user_exists(username, email, session):
