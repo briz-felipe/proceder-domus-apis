@@ -8,6 +8,7 @@ from app.auth.auth_bearer import JWTBearer
 from app.proceder.v1.users.crud.crud import create_new_user,get_email,get_username,user_login
 from app.middleware.rate_limit import limiter   
 from app.config.settings import secrets, envirinment    
+from app.proceder.v1.users.exceptions.exceptions import ProcederException, ProcederExceptionDetail
 
 
 router = APIRouter()
@@ -49,7 +50,10 @@ async def login(user: UserLogin, request: Request, response: Response, session: 
         return TokenResponse(access_token=access_token,refresh_token=refresh_token)
 
     except HTTPException as e:
-        raise e
+        raise ProcedureException(
+            detail=str(e.detail),
+            status_code=e.status_code
+        )
 
     
 @router.get("/verify",
@@ -67,6 +71,7 @@ async def create_user(user_create: CreateUser,request: Request,response:Response
     try:
         user = await create_new_user(
             session=session,
+            admin=False,
             **user_create.dict()
         )
         return UserResponse(
